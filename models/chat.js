@@ -1,6 +1,6 @@
 // models/chatModel.js
-const mongoose = require("mongoose");
-const User = require("./User"); // import the same schema
+import mongoose from "mongoose";
+import User from "./User.js"; // import the same schema
 
 mongoose.model("AuthUser", User.schema); // register it manually
 
@@ -38,4 +38,4 @@ const chatSchema = new mongoose.Schema(
 chatSchema.index({ members: 1 });
 chatSchema.index({ updatedAt: -1 });
 
-module.exports = mongoose.model("Chat", chatSchema);
+export default mongoose.model("Chat", chatSchema);

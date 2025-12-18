@@ -1,6 +1,6 @@
-const express = require("express");
-const auth = require("../middleware/authMiddleware.js");
-const { 
+import express from "express";
+import auth from "../middleware/authMiddleware.js";
+import { 
   // Conversation creation
   accessChat, 
   createGroupChat,
@@ -18,7 +18,7 @@ const {
   // Messaging
   sendMessage, 
   getMessages
-} = require("../controllers/chatController.js");
+} from "../controllers/chatController.js";
 
 const router = express.Router();
 
@@ -26,7 +26,7 @@ const router = express.Router();
 // CONVERSATION CREATION ROUTES
 // ==============================
 // Create or access one-on-one chat
-router.post("/", accessChat);
+router.post("/", auth, accessChat);
 
 // Create group chat with multiple participants
 router.post("/group", createGroupChat);
@@ -64,4 +64,4 @@ router.post("/message", sendMessage);
 // Get all messages in a chat
 router.get("/message/:chatId", getMessages);
 
-module.exports = router;
+export default router;

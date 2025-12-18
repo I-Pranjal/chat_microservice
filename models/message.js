@@ -1,6 +1,6 @@
 // models/messageModel.js
-const mongoose = require("mongoose");
-const User = require("./User"); // Import the same user model
+import mongoose from "mongoose";
+import User from "./User.js"; // Import the same user model
 
 mongoose.model("AuthUser", User.schema); // Register the schema locally
 
@@ -13,4 +13,4 @@ const messageSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Message", messageSchema);
+export default mongoose.model("Message", messageSchema);

@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-// This is the EJS module syntax for importing mongoose
+import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try{
@@ -12,4 +11,4 @@ const connectDB = async () => {
     }
 }
 
-module.exports = connectDB ;
+export default connectDB;

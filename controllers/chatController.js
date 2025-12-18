@@ -7,15 +7,32 @@ import Message from "../models/message.js";
 
 // Create a one-on-one chat
 export const accessChat = async (req, res) => {
-  const { userId } = req.body;
-
+  console.log("Request body:", req.body);
+  
+  // Extract userId - handle both string and nested object formats
+  let userId = req.body.userId;
+  let loggedInUserId = req.body.loggedInUserId;
+  
+  // If userId is an object, extract the actual ID
+  if (typeof userId === 'object' && userId !== null) {
+    userId = userId.userId || userId._id || userId.id;
+  }
+  
+  console.log("Extracted userId:", userId);
+  console.log("Initiated by userID : ", loggedInUserId) ;
+  console.log("Type:", typeof userId);
+  
   try {
-    if (!userId) {
-      return res.status(400).json({ message: "Target userId is required" });
+    if (!userId || typeof userId !== 'string') {
+      return res.status(400).json({ 
+        message: "Target userId is required and must be a string",
+        received: req.body.userId,
+        hint: "Send request body as: { \"userId\": \"string_id_here\" }"
+      });
     }
 
     // ✅ Ensure logged-in user exists from middleware
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing logged-in user" });
     }
@@ -44,7 +61,7 @@ export const accessChat = async (req, res) => {
 
     res.status(200).json(chat);
   } catch (error) {
-    console.error("Error accessing chat:", error);
+    console.error("Error accessing chat:", error.message);
     res.status(500).json({ message: "Error accessing chat", error: error.message });
   }
 };
@@ -54,7 +71,7 @@ export const createGroupChat = async (req, res) => {
   const { name, members, description } = req.body;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -108,7 +125,7 @@ export const addParticipants = async (req, res) => {
   const { chatId, userIds } = req.body;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -157,7 +174,7 @@ export const removeParticipant = async (req, res) => {
   const { chatId, userId } = req.body;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -207,7 +224,7 @@ export const makeAdmin = async (req, res) => {
   const { chatId, userId } = req.body;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -259,7 +276,7 @@ export const makeAdmin = async (req, res) => {
 // Fetch all chats for the logged-in user with metadata
 export const fetchChats = async (req, res) => {
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -289,7 +306,7 @@ export const getChatDetails = async (req, res) => {
   const { chatId } = req.params;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -325,7 +342,7 @@ export const markAsRead = async (req, res) => {
   const { chatId } = req.body;
 
   try {
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -368,7 +385,7 @@ export const sendMessage = async (req, res) => {
       return res.status(400).json({ message: "chatId and text are required" });
     }
 
-    const senderId = req.user?.id;
+    const senderId = req.user?.userId;
     if (!senderId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -425,7 +442,7 @@ export const getMessages = async (req, res) => {
       return res.status(400).json({ message: "chatId is required" });
     }
 
-    const loggedInUserId = req.user?.id;
+    const loggedInUserId = req.user?.userId;
     if (!loggedInUserId) {
       return res.status(401).json({ message: "Unauthorized: Missing user" });
     }
@@ -433,7 +450,7 @@ export const getMessages = async (req, res) => {
     // Authorization check: Verify user is a member
     const chat = await Chat.findById(chatId);
     if (!chat) {
-      return res.status(404).json({ message: "Chat not found" });
+      return res.status(404).json({ message: "Chat not found" }); 
     }
 
     if (!chat.members.includes(loggedInUserId)) {
