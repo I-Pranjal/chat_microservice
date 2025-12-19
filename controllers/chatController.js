@@ -457,7 +457,7 @@ export const getMessages = async (req, res) => {
       return res.status(403).json({ message: "Access denied: Not a member of this chat" });
     }
 
-    const messages = await Message.find({ chatId })
+    const messages = await Message.find({ chatId })  
       .populate("sender", "name contact")
       .sort({ createdAt: 1 });
 
